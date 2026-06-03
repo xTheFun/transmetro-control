@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+
+# Base de datos SQLite (se genera automáticamente con npm run seed)
+*.sqlite3
+*.sqlite
+
+# Variables de entorno con secretos
+.env
+
+# Logs del servidor
+server_out*.txt
+server_err*.txt
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de cobertura de tests
+coverage/

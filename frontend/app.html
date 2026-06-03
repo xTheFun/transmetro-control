@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Transmetro — Control Operativo</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        "primary":"#006037","primary-container":"#0f7b4a","on-primary":"#ffffff",
+        "primary-fixed":"#97f6ba","primary-fixed-dim":"#7bda9f",
+        "secondary":"#49607c","on-secondary":"#ffffff","secondary-container":"#c7dfff",
+        "secondary-fixed":"#d1e4ff","on-secondary-fixed":"#011d35",
+        "error":"#ba1a1a","error-container":"#ffdad6","on-error":"#ffffff","on-error-container":"#93000a",
+        "surface":"#f1fcf0","background":"#f1fcf0","on-surface":"#141e16","on-background":"#141e16",
+        "surface-container":"#e5f1e5","surface-container-low":"#ebf7ea",
+        "surface-container-high":"#e0ebdf","surface-container-highest":"#dae6d9",
+        "surface-container-lowest":"#ffffff","surface-variant":"#dae6d9",
+        "on-surface-variant":"#3f4941","outline":"#6f7a70","outline-variant":"#becabe"
+      },
+      spacing:{"md":"20px","lg":"32px","sm":"12px","xl":"48px","base":"8px","xs":"4px","sidebar-width":"280px"},
+      fontFamily:{"manrope":["Manrope"]},
+      fontSize:{
+        "headline-md":["24px",{"lineHeight":"32px","fontWeight":"700"}],
+        "headline-lg":["32px",{"lineHeight":"40px","fontWeight":"700"}],
+        "headline-sm":["20px",{"lineHeight":"28px","fontWeight":"700"}],
+        "label-lg":["14px",{"lineHeight":"20px","fontWeight":"600"}],
+        "label-sm":["12px",{"lineHeight":"16px","fontWeight":"500"}],
+        "body-md":["16px",{"lineHeight":"24px","fontWeight":"400"}],
+        "body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],
+        "display-num":["48px",{"lineHeight":"1.1","letterSpacing":"-0.02em","fontWeight":"800"}]
+      }
+    }}
+  };
+</script>
+<style>
+  body { font-family:'Manrope',sans-serif; background:#f1fcf0; }
+  .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+  .glass-card { background:rgba(255,255,255,.85); backdrop-filter:blur(12px); border:1px solid rgba(190,202,190,.3); box-shadow:0 4px 20px rgba(20,30,22,.05); }
+  .view { display:none } .view.active { display:block }
+  .navlink.active { background:#006037; color:#fff; }
+  .navlink.active span { color:#fff !important; opacity:1 !important; }
+  ::-webkit-scrollbar { width:6px } ::-webkit-scrollbar-thumb { background:#becabe; border-radius:10px }
+  .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem; }
+  .modal-overlay.hidden { display:none; }
+  /* Bottom nav (móvil) */
+  @media(max-width:767px){
+    #sidebar { display:none; }
+    #main-content { margin-left:0 !important; padding-bottom:72px; }
+    #bottom-nav { display:flex; }
+  }
+  @media(min-width:768px){ #bottom-nav { display:none; } }
+  #bottom-nav { position:fixed;bottom:0;left:0;right:0;background:#49607c;z-index:50;border-top:1px solid rgba(255,255,255,.1); }
+</style>
+</head>
+<body class="text-on-background min-h-screen flex">
+
+<!-- ===== SIDEBAR (escritorio) ===== -->
+<nav id="sidebar" class="hidden md:flex flex-col w-sidebar-width h-screen fixed left-0 top-0 bg-secondary shadow-sm z-50 py-lg">
+  <div class="px-md mb-lg">
+    <div class="flex items-center gap-sm">
+      <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+        <span class="material-symbols-outlined text-white" style="font-variation-settings:'FILL' 1">directions_bus</span>
+      </div>
+      <div>
+        <h1 class="text-headline-md font-bold text-white">Transmetro</h1>
+        <p class="text-label-sm text-secondary-fixed opacity-80">Orden y Progreso</p>
+      </div>
+    </div>
+  </div>
+  <ul class="flex-1 px-2 flex flex-col gap-1">
+    <li><a onclick="ir('dashboard')" class="navlink active flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">dashboard</span><span class="text-label-lg">Panel principal</span></a></li>
+    <li><a onclick="ir('lineas')"    class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">route</span><span class="text-label-lg">Líneas y rutas</span></a></li>
+    <li><a onclick="ir('estaciones')"class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">location_city</span><span class="text-label-lg">Estaciones</span></a></li>
+    <li><a onclick="ir('flota')"     class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">directions_bus</span><span class="text-label-lg">Flota de buses</span></a></li>
+    <li><a onclick="ir('pilotos')"   class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">person</span><span class="text-label-lg">Pilotos</span></a></li>
+    <li><a onclick="ir('ocupacion')" class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">groups</span><span class="text-label-lg">Registro ocupación</span></a></li>
+    <li><a onclick="ir('alertas')"   class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">warning</span><span class="text-label-lg">Alertas</span></a></li>
+    <li><a onclick="ir('reportes')"  class="navlink flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">assessment</span><span class="text-label-lg">Reportes</span></a></li>
+  </ul>
+  <div class="px-2 mt-auto flex flex-col gap-1">
+    <a onclick="ir('perfil')" class="flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">manage_accounts</span><span class="text-label-lg">Mi perfil</span></a>
+    <a onclick="cerrarSesion()" class="flex items-center gap-3 px-4 py-2 mx-2 rounded-full text-white/80 hover:text-white hover:bg-primary-container/20 transition-all cursor-pointer"><span class="material-symbols-outlined">logout</span><span class="text-label-lg">Cerrar sesión</span></a>
+  </div>
+</nav>
+
+<!-- ===== BOTTOM NAV (móvil) ===== -->
+<nav id="bottom-nav" class="gap-0">
+  <a onclick="ir('dashboard')" class="flex-1 flex flex-col items-center py-2 text-white/70 hover:text-white transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">dashboard</span><span style="font-size:10px">Panel</span></a>
+  <a onclick="ir('alertas')"   class="flex-1 flex flex-col items-center py-2 text-white/70 hover:text-white transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">warning</span><span style="font-size:10px">Alertas</span></a>
+  <a onclick="ir('ocupacion')" class="flex-1 flex flex-col items-center py-2 text-white/70 hover:text-white transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">groups</span><span style="font-size:10px">Ocupación</span></a>
+  <a onclick="ir('flota')"     class="flex-1 flex flex-col items-center py-2 text-white/70 hover:text-white transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">directions_bus</span><span style="font-size:10px">Flota</span></a>
+  <a onclick="ir('reportes')"  class="flex-1 flex flex-col items-center py-2 text-white/70 hover:text-white transition-colors cursor-pointer"><span class="material-symbols-outlined text-xl">assessment</span><span style="font-size:10px">Reportes</span></a>
+</nav>
+
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
+<div id="main-content" class="flex-1 md:ml-sidebar-width flex flex-col min-h-screen">
+
+<!-- TOPBAR -->
+<header class="bg-surface/85 backdrop-blur-md border-b border-outline-variant/30 shadow-sm sticky top-0 z-40">
+  <div class="flex justify-between items-center px-4 md:px-lg py-3 md:py-md">
+    <h2 id="topTitle" class="text-lg md:text-headline-md text-primary font-bold">Panel principal</h2>
+    <div class="flex items-center gap-2 md:gap-md">
+      <button onclick="ir('alertas')" class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors relative">
+        <span class="material-symbols-outlined">notifications</span>
+        <span id="alertaBadge" class="hidden absolute top-1 right-1 w-4 h-4 bg-error rounded-full text-white text-[9px] flex items-center justify-center font-bold"></span>
+      </button>
+      <div class="flex items-center gap-sm pl-2 md:pl-md border-l border-outline-variant/30 cursor-pointer" onclick="ir('perfil')">
+        <div id="avatarUser" class="w-9 h-9 md:w-10 md:h-10 rounded-full bg-secondary text-white flex items-center justify-center text-label-lg font-bold">WV</div>
+        <div class="hidden sm:block">
+          <p id="nombreUser" class="text-label-lg text-on-surface">Walter Vicente</p>
+          <p id="rolUser" class="text-label-sm text-on-surface-variant">Supervisor</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="flex-1 p-4 md:p-lg w-full max-w-[1280px] mx-auto">
+
+<!-- ========== PANEL PRINCIPAL ========== -->
+<div class="view active" data-view="dashboard" id="view-dashboard"></div>
+
+<!-- ========== LÍNEAS Y RUTAS ========== -->
+<div class="view" data-view="lineas" id="view-lineas"></div>
+
+<!-- ========== ESTACIONES ========== -->
+<div class="view" data-view="estaciones" id="view-estaciones"></div>
+
+<!-- ========== FLOTA DE BUSES ========== -->
+<div class="view" data-view="flota" id="view-flota"></div>
+
+<!-- ========== PILOTOS ========== -->
+<div class="view" data-view="pilotos" id="view-pilotos"></div>
+
+<!-- ========== REGISTRO OCUPACIÓN ========== -->
+<div class="view" data-view="ocupacion" id="view-ocupacion"></div>
+
+<!-- ========== ALERTAS ========== -->
+<div class="view" data-view="alertas" id="view-alertas"></div>
+
+<!-- ========== REPORTES ========== -->
+<div class="view" data-view="reportes" id="view-reportes"></div>
+
+<!-- ========== PERFIL ========== -->
+<div class="view" data-view="perfil" id="view-perfil"></div>
+
+</main>
+</div>
+
+<!-- ===== MODAL GENÉRICO ===== -->
+<div id="modal" class="modal-overlay hidden" onclick="cerrarModal(event)">
+  <div class="glass-card rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+    <div class="flex justify-between items-start mb-4">
+      <h3 id="modalTitulo" class="text-headline-sm text-on-surface"></h3>
+      <button onclick="cerrarModal()" class="p-1 rounded-full hover:bg-surface-container-high text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div id="modalCuerpo"></div>
+  </div>
+</div>
+
+<!-- ===== TOAST / NOTIFICACIONES ===== -->
+<div id="toast" class="fixed bottom-20 md:bottom-6 right-4 z-[200] flex flex-col gap-2 items-end pointer-events-none"></div>
+
+<!-- Scripts de módulos -->
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/lineas.js"></script>
+<script src="/js/estaciones.js"></script>
+<script src="/js/buses.js"></script>
+<script src="/js/pilotos.js"></script>
+<script src="/js/ocupacion.js"></script>
+<script src="/js/alertas.js"></script>
+<script src="/js/reportes.js"></script>
+<script src="/js/perfil.js"></script>
+
+<script>
+// ── Verificar sesión al cargar
+(function() {
+  const token = localStorage.getItem('tm_token') || sessionStorage.getItem('tm_token');
+  if (!token) { window.location.href = '/'; return; }
+  const userData = JSON.parse(localStorage.getItem('tm_usuario_data') || '{}');
+  if (userData.nombre) {
+    const iniciales = userData.nombre.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('avatarUser').textContent = iniciales;
+    document.getElementById('nombreUser').textContent = userData.nombre;
+    document.getElementById('rolUser').textContent = userData.rol?.charAt(0).toUpperCase() + userData.rol?.slice(1);
+  }
+})();
+
+// ── Navegación entre vistas
+const titulos = {
+  dashboard:'Panel principal', lineas:'Líneas y rutas', estaciones:'Estaciones',
+  flota:'Flota de buses', pilotos:'Pilotos', ocupacion:'Registro de ocupación',
+  alertas:'Alertas', reportes:'Reportes', perfil:'Mi perfil'
+};
+
+function ir(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  const vista = document.querySelector(`[data-view="${v}"]`);
+  if (vista) vista.classList.add('active');
+  document.querySelectorAll('.navlink').forEach(el => el.classList.remove('active'));
+  const link = [...document.querySelectorAll('.navlink')].find(a => a.getAttribute('onclick') === `ir('${v}')`);
+  if (link) link.classList.add('active');
+  document.getElementById('topTitle').textContent = titulos[v] || '';
+  window.scrollTo(0,0);
+
+  // Cargar datos del módulo
+  const cargadores = {
+    dashboard: cargarDashboard,
+    lineas: cargarLineas,
+    estaciones: cargarEstaciones,
+    flota: cargarFlota,
+    pilotos: cargarPilotos,
+    ocupacion: cargarOcupacion,
+    alertas: cargarAlertas,
+    reportes: cargarReportes,
+    perfil: cargarPerfil
+  };
+  if (cargadores[v]) cargadores[v]();
+}
+
+// ── Cerrar sesión
+function cerrarSesion() {
+  localStorage.removeItem('tm_token');
+  sessionStorage.removeItem('tm_token');
+  window.location.href = '/';
+}
+
+// ── Modal genérico
+function abrirModal(titulo, html) {
+  document.getElementById('modalTitulo').textContent = titulo;
+  document.getElementById('modalCuerpo').innerHTML = html;
+  document.getElementById('modal').classList.remove('hidden');
+}
+function cerrarModal(e) {
+  if (!e || e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.add('hidden');
+  }
+}
+
+// ── Toast
+function toast(msg, tipo='success') {
+  const colores = { success:'bg-primary text-white', error:'bg-error text-white', info:'bg-secondary text-white' };
+  const t = document.createElement('div');
+  t.className = `${colores[tipo]||colores.info} px-4 py-3 rounded-xl shadow-lg text-sm font-semibold pointer-events-auto flex items-center gap-2 max-w-xs`;
+  t.innerHTML = `<span class="material-symbols-outlined text-sm">${tipo==='error'?'error':tipo==='success'?'check_circle':'info'}</span>${msg}`;
+  document.getElementById('toast').appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+// ── Cargar alerta badge
+async function actualizarBadgeAlertas() {
+  try {
+    const data = await api('/api/alertas?estado=pendiente');
+    const badge = document.getElementById('alertaBadge');
+    if (data.length > 0) {
+      badge.textContent = data.length > 9 ? '9+' : data.length;
+      badge.classList.remove('hidden');
+    } else { badge.classList.add('hidden'); }
+  } catch {}
+}
+
+// Cargar módulo inicial y actualizar badge
+cargarDashboard();
+actualizarBadgeAlertas();
+setInterval(actualizarBadgeAlertas, 30000);
+</script>
+</body>
+</html>

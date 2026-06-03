@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Transmetro — Iniciar sesión</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        "primary": "#006037", "primary-container": "#0f7b4a",
+        "secondary": "#49607c", "surface": "#f1fcf0",
+        "surface-container": "#e5f1e5", "on-surface": "#141e16",
+        "on-surface-variant": "#3f4941", "outline-variant": "#becabe",
+        "error": "#ba1a1a"
+      },
+      fontFamily: { "manrope": ["Manrope"] }
+    }}
+  };
+</script>
+<style>
+  body { font-family: 'Manrope', sans-serif; background: linear-gradient(135deg, #102A43 0%, #006037 100%); min-height: 100vh; }
+  .glass-card { background: rgba(255,255,255,.92); backdrop-filter: blur(20px); border: 1px solid rgba(190,202,190,.3); box-shadow: 0 8px 32px rgba(20,30,22,.15); }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+</style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+<div class="w-full max-w-md">
+  <!-- Logo y tagline -->
+  <div class="text-center mb-8">
+    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur mb-4 border border-white/20">
+      <span class="material-symbols-outlined text-white" style="font-size:40px;font-variation-settings:'FILL' 1">directions_bus</span>
+    </div>
+    <h1 class="text-3xl font-bold text-white">Transmetro</h1>
+    <p class="text-white/70 text-sm mt-1">Orden y Progreso</p>
+  </div>
+
+  <!-- Tarjeta de login -->
+  <div class="glass-card rounded-2xl p-8">
+    <h2 class="text-xl font-bold text-on-surface mb-1">Iniciar sesión</h2>
+    <p class="text-sm text-on-surface-variant mb-6">Sistema de Control Operativo</p>
+
+    <div id="errorLogin" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm">error</span>
+      <span id="errorMsg"></span>
+    </div>
+
+    <form id="loginForm" class="flex flex-col gap-4">
+      <!-- Usuario -->
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-1.5" for="usuario">Usuario</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-size:20px">person</span>
+          <input id="usuario" name="usuario" type="text" autocomplete="username"
+            class="w-full pl-10 pr-4 py-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:outline-none text-on-surface"
+            placeholder="Ingresa tu usuario" required maxlength="50"/>
+        </div>
+      </div>
+
+      <!-- Contraseña con ojo -->
+      <div>
+        <label class="block text-sm font-semibold text-on-surface mb-1.5" for="contrasena">Contraseña</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" style="font-size:20px">lock</span>
+          <input id="contrasena" name="contrasena" type="password" autocomplete="current-password"
+            class="w-full pl-10 pr-12 py-3 rounded-xl border border-outline-variant bg-surface focus:border-primary focus:outline-none text-on-surface"
+            placeholder="••••••••" required maxlength="100"/>
+          <!-- Ícono de ojo: alterna ver/ocultar contraseña -->
+          <button type="button" id="togglePassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors p-1"
+            aria-label="Mostrar/ocultar contraseña">
+            <span class="material-symbols-outlined" id="eyeIcon" style="font-size:20px">visibility</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recordar credenciales (guarda el usuario, NO la contraseña) -->
+      <label class="flex items-center gap-3 cursor-pointer select-none">
+        <input type="checkbox" id="recordar" class="w-4 h-4 rounded accent-primary"/>
+        <span class="text-sm text-on-surface-variant">Recordar credenciales</span>
+      </label>
+
+      <button type="submit" id="btnLogin"
+        class="w-full py-3 bg-primary hover:bg-primary-container text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2 mt-2">
+        <span class="material-symbols-outlined" style="font-size:20px">login</span>
+        Ingresar al sistema
+      </button>
+    </form>
+
+    <p class="text-xs text-center text-on-surface-variant mt-6">
+      Sistema de uso exclusivo de personal autorizado de Transmetro.<br/>
+      Guatemala, 2026.
+    </p>
+  </div>
+</div>
+
+<script>
+// ── Ojo: alternar visibilidad de contraseña
+const inputPwd = document.getElementById('contrasena');
+const eyeIcon  = document.getElementById('eyeIcon');
+document.getElementById('togglePassword').addEventListener('click', () => {
+  const visible = inputPwd.type === 'text';
+  inputPwd.type = visible ? 'password' : 'text';
+  eyeIcon.textContent = visible ? 'visibility' : 'visibility_off';
+});
+
+// ── Recordar usuario (NUNCA la contraseña)
+const usuarioInput = document.getElementById('usuario');
+const recordarCb   = document.getElementById('recordar');
+const guardado     = localStorage.getItem('tm_usuario');
+if (guardado) { usuarioInput.value = guardado; recordarCb.checked = true; }
+
+// ── Submit del formulario
+document.getElementById('loginForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+
+  const errDiv = document.getElementById('errorLogin');
+  errDiv.classList.add('hidden');
+
+  const usuario   = usuarioInput.value.trim();
+  const contrasena= document.getElementById('contrasena').value;
+  const recordar  = recordarCb.checked;
+
+  try {
+    const resp = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario, contrasena, recordar })
+    });
+    const data = await resp.json();
+
+    if (!resp.ok) throw new Error(data.error || 'Error al iniciar sesión.');
+
+    // Guardar token en sessionStorage (o localStorage si "recordar")
+    const storage = recordar ? localStorage : sessionStorage;
+    storage.setItem('tm_token', data.token);
+    localStorage.setItem('tm_usuario_data', JSON.stringify(data.usuario));
+
+    // Recordar usuario (NUNCA la contraseña)
+    if (recordar) localStorage.setItem('tm_usuario', usuario);
+    else          localStorage.removeItem('tm_usuario');
+
+    // Redirigir al dashboard
+    window.location.href = '/app.html';
+  } catch (err) {
+    document.getElementById('errorMsg').textContent = err.message;
+    errDiv.classList.remove('hidden');
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:20px">login</span> Ingresar al sistema';
+  }
+});
+</script>
+</body>
+</html>
