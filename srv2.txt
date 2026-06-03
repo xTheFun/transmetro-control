@@ -1,0 +1,6 @@
+🗄️  Modo BD: demo
+✅ Migraciones aplicadas.
+
+🚌 Transmetro Control corriendo en http://localhost:3000
+   Login: admin / Admin2026
+
