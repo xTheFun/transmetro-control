@@ -55,4 +55,35 @@ async function resumen(req, res) {
   res.json({ alertas_hoy: Number(alertasHoy.total), buses_en_operacion: Number(busesEnOp.total), ocupacion_promedio: Number(promedio) });
 }
 
-module.exports = { ocupacionPorEstacion, estadoLineas, estadoFlota, resumen };
+// GET /api/reportes/buses-por-linea
+// Punto 15: muestra cada línea con el listado detallado de buses asignados
+async function busesPorLinea(req, res) {
+  const lineas = await db('linea').select('*').orderBy('codigo');
+  const resultado = await Promise.all(lineas.map(async l => {
+    const buses = await db('bus as b')
+      .leftJoin('piloto as p', 'b.id', 'p.id_bus')
+      .leftJoin('parqueo as pk', 'b.id_parqueo', 'pk.id')
+      .where('b.id_linea', l.id)
+      .select('b.codigo', 'b.placa', 'b.capacidad', 'b.estado', 'pk.nombre as parqueo', 'p.nombre as piloto')
+      .orderBy('b.codigo');
+    const estaciones = await db('linea_estacion as le')
+      .join('estacion as e', 'le.id_estacion', 'e.id')
+      .where('le.id_linea', l.id)
+      .orderBy('le.orden')
+      .select('e.nombre', 'le.orden', 'le.distancia_tramo');
+    return {
+      id: l.id,
+      codigo: l.codigo,
+      nombre: l.nombre,
+      estado: l.estado,
+      distancia_total: l.distancia_total,
+      total_buses: buses.length,
+      total_estaciones: estaciones.length,
+      buses,
+      estaciones
+    };
+  }));
+  res.json(resultado);
+}
+
+module.exports = { ocupacionPorEstacion, estadoLineas, estadoFlota, resumen, busesPorLinea };

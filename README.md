@@ -102,6 +102,19 @@ Las estaciones de transferencia (Plaza Barrios, El Trébol, Centra Sur, Centra A
 
 ---
 
+## Metodología de desarrollo
+
+Se utilizó la metodología **Scrum** con iteraciones cortas (sprints de 1 semana). Cada sprint incluyó análisis, diseño, implementación y pruebas de un conjunto de módulos. Las historias de usuario se organizaron por módulo funcional del sistema.
+
+Las etapas del proyecto fueron:
+1. Levantamiento de requerimientos y diseño del modelo de datos
+2. Desarrollo del backend (API REST, reglas de negocio, autenticación)
+3. Desarrollo del frontend (8 módulos conectados a la API)
+4. Pruebas funcionales y corrección de errores
+5. Despliegue y documentación final
+
+---
+
 ## Scripts disponibles
 
 ```bash
